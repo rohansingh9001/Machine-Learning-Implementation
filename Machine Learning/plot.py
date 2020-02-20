@@ -16,6 +16,7 @@ Blue Line : Final result of gradient descent.
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 # Not needed as of now but is usefull in debugging.
 from mpl_toolkits.mplot3d import axes3d
@@ -55,7 +56,7 @@ def readdata(file):
 
     If the training data is stored in "dataset.txt" use
 
-    >>>readdata('dataset.txt')
+    >>> readdata('dataset.txt')
 
     '''
     A = np.genfromtxt(file)
@@ -180,12 +181,28 @@ def gradient_descent():
     a - learning rate
     dm - derivative of loss function wrt x (parameter)
 
-    'steps' is the total number of iterations before 
+    'steps' is the total number 
+    of iterations before 
     we stop gradient descent.
     '''
     global W
     for step in range(steps):
         W = W - a * dm(X, Y, W)
+
+
+# Stochastic gradient descent execution.
+def gradient_descent_stochastic():
+
+    global W
+
+    for step in range(steps):
+        # Choose a random data point to calculate gradient descent
+        i = random.randint(0, N)
+        x = X[i, :]
+        y = Y[:, i]
+        x.shape = (1, N)
+        y.shape = (1, 1)
+        W = W - a * dm(x, y, W)
 
 
 # Plots the final output and shows the graph.
@@ -212,6 +229,6 @@ if __name__ == '__main__':
 
     initplot()
 
-    gradient_descent()
+    gradient_descent_stochastic()
 
     finalplot()
