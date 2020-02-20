@@ -1,2 +1,2 @@
 # Machine-Learning-Implementation
-A implementation of basic machine learning algorithms in python.
+An implementation of basic machine learning algorithms in python.
