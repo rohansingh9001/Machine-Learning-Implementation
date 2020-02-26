@@ -197,11 +197,25 @@ def gradient_descent_stochastic():
 
     for step in range(steps):
         # Choose a random data point to calculate gradient descent
-        i = random.randint(0, N)
+        i = random.randint(0, M-1)
         x = X[i, :]
         y = Y[:, i]
         x.shape = (1, N)
         y.shape = (1, 1)
+        W = W - a * dm(x, y, W)
+
+
+def gradient_descent_mini_batch(batchsize=5):
+
+    global W
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
         W = W - a * dm(x, y, W)
 
 
@@ -229,6 +243,6 @@ if __name__ == '__main__':
 
     initplot()
 
-    gradient_descent_stochastic()
+    gradient_descent()
 
     finalplot()
