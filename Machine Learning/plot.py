@@ -13,6 +13,9 @@ Black Line : Randomised initial line as a starting point if gradient descent.
 Blue Line : Final result of gradient descent.
 '''
 
+__author__ = 'Rohan Singh, singh.77@iitj.ac.in'
+
+__version__ = '0.2'
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -73,7 +76,7 @@ def readdata(file):
 def activation(X, W):
     '''
     Returns X * W.
-    Where, 
+    Where,
     X is the parameter matrix
     W is the weight matrix
 
@@ -88,7 +91,7 @@ def activation(X, W):
         Parameter Matrix
     W:
         data type : numpy array
-        Weight Matrix    
+        Weight Matrix
 
     Example
     =======
@@ -98,7 +101,7 @@ def activation(X, W):
     >>> X = np.array([[5, 1]])
     >>> W = np.array([[2], [5]])
     >>> activation()
-    15 
+    15
 
     '''
     return np.matmul(X, W)
@@ -113,7 +116,7 @@ def loss(X, W, Y):
 def dm(X, Y, W):
     '''
     Returns d/dx(loss).
-    Where, 
+    Where,
     X is the parameter matrix
     Y is expected output vector
     W is the weight matrix
@@ -136,7 +139,7 @@ def dm(X, Y, W):
         Expected Output Matrix
     W:
         data type : numpy array
-        Weight Matrix    
+        Weight Matrix
 
     '''
     return (np.matmul((activation(X, W).transpose() - Y), X).transpose()) / M
@@ -145,7 +148,7 @@ def dm(X, Y, W):
 # Generate Weights
 def generate_weights():
     '''
-    Generates a Matrix of weights according to the 
+    Generates a Matrix of weights according to the
     input data.
     '''
     global W
@@ -160,8 +163,8 @@ def initplot():
     The input data in terms of
     a scatter plot of red dots.
 
-    The random initial line which is 
-    the starting point of gradient 
+    The random initial line which is
+    the starting point of gradient
     descent as a black line.
     '''
     plt.xlabel('parameter')
@@ -181,8 +184,8 @@ def gradient_descent():
     a - learning rate
     dm - derivative of loss function wrt x (parameter)
 
-    'steps' is the total number 
-    of iterations before 
+    'steps' is the total number
+    of iterations before
     we stop gradient descent.
     '''
     global W
@@ -219,12 +222,146 @@ def gradient_descent_mini_batch(batchsize=5):
         W = W - a * dm(x, y, W)
 
 
+# Variable required for gradient descent algorithms with momentum.
+Vp = 0
+
+
+# Gradient Descent with momentum.
+# Vp is previous change Vc is current change.
+def gradient_descent_momentum(batchsize=5):
+
+    gamma = 0.9
+
+    global W
+    global Vp
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
+
+        Vc = gamma * Vp + a * dm(x, y, W)
+
+        W = W - Vc
+
+        Vp = Vc
+
+
+def gradient_descent_nesterov_accelerated(batchsize=5):
+
+    gamma = 0.9
+
+    global W
+    global Vp
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
+
+        Vc = gamma * Vp + a * dm(x, y, W - gamma * Vp)
+
+        W = W - Vc
+
+        Vp = Vc
+
+
+# Variable required for gradient descent algorithms which include adagrad, RMSprop and adaDelta.
+S = 0
+
+
+# Adagrad implementation.
+def gradient_descent_adagrad(batchsize=5):
+
+    epsilon = 0.00000001
+
+    global W
+    global S
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
+
+        d = dm(x, y, W)
+        S += d * d
+        W = W - a / np.sqrt(S + epsilon) * d
+
+
+# AdaDelta/RMSProp implementation.
+def gradient_descent_adadelta(batchsize=5):
+
+    epsilon = 0.00000001
+    gamma = 0.9
+
+    global W
+    global S
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
+
+        d = dm(x, y, W)
+        S = gamma * S + (1 - gamma) * d * d
+        W = W - a / np.sqrt(S + epsilon) * d
+
+ # Variable required for gradient descent algorithms which include adagrad, RMSprop and adaDelta.
+V = 0
+S = 0
+Vc = 0
+Sc = 0
+
+# AdaDelta/RMSProp implementation.
+
+
+def gradient_descent_adam(batchsize=5):
+
+    epsilon = 0.00000001
+    b1 = 0.9
+    b2 = 0.999
+
+    global W
+    global V, Vc
+    global S, Sc
+
+    for step in range(steps):
+
+        index = [random.randint(0, M-1) for i in range(batchsize)]
+        x = X[index, :]
+        y = Y[:, index]
+        x.shape = (batchsize, N)
+        y.shape = (1, batchsize)
+
+        d = dm(x, y, W)
+
+        V = b1 * V + (1 - b1) * d
+        S = b2 * S + (1 - b2) * d * d
+
+        Vc = V / (1 - (b1))
+        Sc = S / (1 - (b2))
+
+        W = W - a / (np.sqrt(Sc) + epsilon) * Vc
+
+
 # Plots the final output and shows the graph.
 def finalplot():
     '''
     Plots the final conditions.
 
-    The final output line in the form of 
+    The final output line in the form of
     a blue line.
     '''
     plt.plot(X[:, 0], activation(X, W), 'b')
@@ -234,8 +371,8 @@ def finalplot():
 if __name__ == '__main__':
 
     # Define parameters related to gradient descent
-    steps = 1000
-    a = 0.0001
+    steps = 2000
+    a = 0.01
 
     readdata('dataset1.txt')
 
@@ -243,6 +380,8 @@ if __name__ == '__main__':
 
     initplot()
 
-    gradient_descent()
+    gradient_descent_adam()
+
+    printmat('W', W)
 
     finalplot()
